@@ -13,9 +13,9 @@ function buildStorybook(currentPackage, outputDirectory, npmScriptName, docs) {
   shell.mkdir(outputDirectory);
 
   if (currentPackage.scripts[npmScriptName]) {
-    publishUtils.exec(`npm run ${npmScriptName} -- -o${docs ? ' --docs ' : ' '}${outputDirectory}`);
+    publishUtils.exec(`npm run ${npmScriptName} -- -o ${outputDirectory} ${docs ? '--docs' : ''}`);
   } else {
-    publishUtils.exec(`build-storybook  -o${docs ? ' --docs ' : ' '}${outputDirectory}`);
+    publishUtils.exec(`build-storybook  -o ${outputDirectory} ${docs ? '--docs' : ''}`);
   }
 }
 
