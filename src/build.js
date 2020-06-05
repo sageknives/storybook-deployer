@@ -5,7 +5,7 @@ const fs = require('fs');
 const publishUtils = require('./utils');
 const shell = require('shelljs');
 
-function buildStorybook(currentPackage, outputDirectory, npmScriptName) {
+function buildStorybook(currentPackage, outputDirectory, npmScriptName, docs) {
   console.log(`=> Building storybook for: ${currentPackage.name}`);
 
   // clear and re-create the out directory
@@ -13,13 +13,13 @@ function buildStorybook(currentPackage, outputDirectory, npmScriptName) {
   shell.mkdir(outputDirectory);
 
   if (currentPackage.scripts[npmScriptName]) {
-    publishUtils.exec(`npm run ${npmScriptName} -- -o ${outputDirectory}`);
+    publishUtils.exec(`npm run ${npmScriptName} -- -o${docs ? ' --docs ' : ' '}${outputDirectory}`);
   } else {
     publishUtils.exec(`build-storybook  -o ${outputDirectory}`);
   }
 }
 
-function buildSubPackage(origDir, dir, outputDirectory, npmScriptName) {
+function buildSubPackage(origDir, dir, outputDirectory, npmScriptName, docs) {
   shell.cd(dir);
 
   if (!fs.existsSync('package.json')) {
@@ -37,7 +37,7 @@ function buildSubPackage(origDir, dir, outputDirectory, npmScriptName) {
     return;
   }
 
-  buildStorybook(subPackage, outputDirectory, npmScriptName);
+  buildStorybook(subPackage, outputDirectory, npmScriptName, docs);
 
   const builtStorybook = path.join(dir, outputDirectory, '*');
   const outputPath = path.join(origDir, outputDirectory, subPackage.name);
@@ -55,7 +55,8 @@ module.exports = function(
   packageJson,
   packagesDirectory,
   npmScriptName,
-  monorepoIndexGenerator
+  monorepoIndexGenerator,
+  docs
 ) {
   if (skipBuild) {
     return;
@@ -76,8 +77,8 @@ module.exports = function(
 
     shell.cd(origDir);
 
-    buildMonorepoIndex(packages, monorepoIndexGenerator, outputDirectory);
+    buildMonorepoIndex(packages, monorepoIndexGenerator, outputDirectory, docs);
   } else {
-    buildStorybook(packageJson, outputDirectory, npmScriptName);
+    buildStorybook(packageJson, outputDirectory, npmScriptName, docs);
   }
 };
